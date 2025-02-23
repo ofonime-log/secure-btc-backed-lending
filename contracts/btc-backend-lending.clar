@@ -135,3 +135,35 @@
         (<= loan-id (var-get total-loans-issued))
     )
 )
+
+;; Helper function to validate asset string
+(define-private (is-valid-asset (asset (string-ascii 3)))
+    (is-some (index-of VALID-ASSETS asset))
+)
+
+;; Helper function to validate price
+(define-private (is-valid-price (price uint))
+    (and 
+        (> price u0)
+        (<= price u1000000000000) ;; Reasonable upper limit for price
+    )
+)
+
+;; Public Functions
+(define-public (initialize-platform)
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+        (asserts! (not (var-get platform-initialized)) ERR-ALREADY-INITIALIZED)
+        (var-set platform-initialized true)
+        (ok true)
+    )
+)
+
+(define-public (deposit-collateral (amount uint))
+    (begin
+        (asserts! (var-get platform-initialized) ERR-NOT-INITIALIZED)
+        (asserts! (> amount u0) ERR-INVALID-AMOUNT)
+        (var-set total-btc-locked (+ (var-get total-btc-locked) amount))
+        (ok true)
+    )
+)
