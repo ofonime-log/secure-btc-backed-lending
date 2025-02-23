@@ -96,3 +96,42 @@
         total-interest
     )
 )
+
+(define-private (check-liquidation (loan-id uint))
+    (let
+        (
+            (loan (unwrap! (map-get? loans {loan-id: loan-id}) ERR-LOAN-NOT-FOUND))
+            (btc-price (unwrap! (get price (map-get? collateral-prices {asset: "BTC"})) ERR-NOT-INITIALIZED))
+            (current-ratio (calculate-collateral-ratio (get collateral-amount loan) (get loan-amount loan) btc-price))
+        )
+        (if (<= current-ratio (var-get liquidation-threshold))
+            (liquidate-position loan-id)
+            (ok true)
+        )
+    )
+)
+
+(define-private (liquidate-position (loan-id uint))
+    (let
+        (
+            (loan (unwrap! (map-get? loans {loan-id: loan-id}) ERR-LOAN-NOT-FOUND))
+            (borrower (get borrower loan))
+        )
+        (begin
+            (map-set loans
+                {loan-id: loan-id}
+                (merge loan {status: "liquidated"})
+            )
+            (map-delete user-loans {user: borrower})
+            (ok true)
+        )
+    )
+)
+
+;; Helper function to validate loan-id
+(define-private (validate-loan-id (loan-id uint))
+    (and 
+        (> loan-id u0)
+        (<= loan-id (var-get total-loans-issued))
+    )
+)
