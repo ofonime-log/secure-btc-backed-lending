@@ -187,8 +187,8 @@
                     collateral-amount: collateral,
                     loan-amount: loan-amount,
                     interest-rate: u5, ;; 5% interest rate
-                    start-height: block-height,
-                    last-interest-calc: block-height,
+                    start-height: stacks-block-height,
+                    last-interest-calc: stacks-block-height,
                     status: "active"
                 }
             )
@@ -221,7 +221,7 @@
                 (interest-owed (calculate-interest 
                     (get loan-amount loan)
                     (get interest-rate loan)
-                    (- block-height (get last-interest-calc loan))
+                    (- stacks-block-height (get last-interest-calc loan))
                 ))
                 (total-owed (+ (get loan-amount loan) interest-owed))
             )
@@ -235,7 +235,7 @@
                     {loan-id: loan-id}
                     (merge loan {
                         status: "repaid",
-                        last-interest-calc: block-height
+                        last-interest-calc: stacks-block-height
                     })
                 )
                 
