@@ -65,3 +65,34 @@
         status: (string-ascii 20)
     }
 )
+
+(define-map user-loans
+    { user: principal }
+    { active-loans: (list 10 uint) }
+)
+
+(define-map collateral-prices
+    { asset: (string-ascii 3) }
+    { price: uint }
+)
+
+;; Private Functions
+(define-private (calculate-collateral-ratio (collateral uint) (loan uint) (btc-price uint))
+    (let
+        (
+            (collateral-value (* collateral btc-price))
+            (ratio (* (/ collateral-value loan) u100))
+        )
+        ratio
+    )
+)
+
+(define-private (calculate-interest (principal uint) (rate uint) (blocks uint))
+    (let
+        (
+            (interest-per-block (/ (* principal rate) (* u100 u144))) ;; Daily interest divided by blocks per day
+            (total-interest (* interest-per-block blocks))
+        )
+        total-interest
+    )
+)
